@@ -218,6 +218,13 @@ func parentChildMux() {
 	mux.Handle("/record", http.StripPrefix("/record", record))
 }
 
+func handlerFunc() {
+	m := http.NewServeMux()
+	m.HandleFunc("/path", func(w http.ResponseWriter, r *http.Request) {
+		w.Write([]byte("Hello, world!"))
+	})
+}
+
 // One last pitfall
 
 // The http library offers functions that work with the package instance of
@@ -276,6 +283,17 @@ func TerribleSecurityProvider(password string) func(http.Handler) http.Handler {
 			h.ServeHTTP(w, r)
 		})
 	}
+}
+
+// Heres how to combine the two
+
+func combine() http.Handler {
+	ts := TerribleSecurityProvider("password")
+	handler := ts(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		w.Write([]byte("Hello, world\n"))
+	}))
+
+	return handler
 }
 
 // Now for the implementation!
